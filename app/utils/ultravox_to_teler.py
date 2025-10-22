@@ -30,7 +30,7 @@ async def ultravox_to_teler(ultravox_ws, websocket: WebSocket):
                             "audio_b64": audio_b64,
                             "chunk_id": chunk_id
                         })
-                        logger.info(f"[ultravox] Sent chunk {chunk_id} ({len(audio_buffer)} bytes)")
+                        logger.debug(f"[ultravox] Sent chunk {chunk_id} ({len(audio_buffer)} bytes)")
                         chunk_id += 1
                         audio_buffer = b""
 
@@ -45,19 +45,19 @@ async def ultravox_to_teler(ultravox_ws, websocket: WebSocket):
                     
                     if msg_type == "call_started":
                         call_id = message_json.get("callId")
-                        logger.info(f'Call started, call_id: {callId}')
+                        logger.info(f'Call started, call_id: {call_id}')
                         
                     elif msg_type == "transcript":
                         role = message_json.get("role")
                         text = message_json.get("text")
-                        logger.info(f"{role.capitalize()} Conversation: {text}")
+                        logger.debug(f"{role.capitalize()} Conversation: {text}")
                         
                     elif msg_type == "playback_clear_buffer":
                         audio_buffer = b""
                         await websocket.send_json({"type": "clear"})
                         
                     elif msg_type == "state":
-                        logger.info(f"State of the agent is: {message_json.get('set_output_medium')}")
+                        logger.info(f"State of the agent is: {message_json.get('state')}")
                         
                     else:
                         logger.debug(f"Message: {message_json}")
@@ -75,7 +75,7 @@ async def ultravox_to_teler(ultravox_ws, websocket: WebSocket):
                 "audio_b64": audio_b64,
                 "chunk_id": chunk_id
             })
-            logger.info(f"[ultravox] Sent final chunk {chunk_id} ({len(audio_buffer)} bytes)")
+            logger.debug(f"[ultravox] Sent final chunk {chunk_id} ({len(audio_buffer)} bytes)")
             audio_buffer =  b""
 
         if websocket.client_state != WebSocketState.DISCONNECTED:
@@ -84,4 +84,4 @@ async def ultravox_to_teler(ultravox_ws, websocket: WebSocket):
             await ultravox_ws.close()
         except Exception as e:
             logger.error(f"Error closing Ultravox WebSocket: {type(e).__name__}: {e}")
-        logger.info("ultravox_to_teler task ended")
+        logger.debug("ultravox_to_teler task ended")

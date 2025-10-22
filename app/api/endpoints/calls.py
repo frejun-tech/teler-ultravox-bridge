@@ -99,7 +99,7 @@ async def media_stream(websocket: WebSocket):
         async with websockets.connect(
             ULTRAVOX_JOIN_URL
         ) as ultravox_join_url:
-            logger.info("[media-stream] ✅ Successfully connected to Ultravox WebSocket")
+            logger.info("[media-stream] Successfully connected to Ultravox WebSocket")
 
             recv_task = asyncio.create_task(
                 teler_to_ultravox(ultravox_join_url, websocket), 
@@ -120,10 +120,10 @@ async def media_stream(websocket: WebSocket):
                     if task.exception():
                         logger.error(f"Task {task.get_name()} failed: {task.exception()}")
                     else:
-                        logger.info(f"Task {task.get_name()} completed successfully")
+                        logger.debug(f"Task {task.get_name()} completed successfully")
 
                 for task in pending:
-                    logger.info(f"Canceling task {task.get_name()}")
+                    logger.error(f"Canceling task {task.get_name()}")
                     task.cancel()
                     try:
                         await task
@@ -135,17 +135,17 @@ async def media_stream(websocket: WebSocket):
 
 
     except WebSocketDisconnect:
-        logger.info("[media-stream] ⚠️ Teler WebSocket disconnected — closing Ultravox connection...")
+        logger.error("[media-stream] Teler WebSocket disconnected — closing Ultravox connection...")
         if ultravox_join_url and not ultravox_join_url.closed:
             await ultravox_join_url.close()
-            logger.info("[media-stream] ✅ Ultravox connection closed after Teler disconnect")
+            logger.info("[media-stream] Ultravox connection closed after Teler disconnect")
 
     except websockets.exceptions.InvalidStatusCode as e:
-        logger.error(f"[media-stream] ❌ WebSocket connection failed with status {e.status_code}: {e}")
+        logger.error(f"[media-stream] WebSocket connection failed with status {e.status_code}: {e}")
         if e.status_code == 403:
             logger.error("[media-stream] Invalid API key or permission issue.")
     except Exception as e:
-        logger.error(f"[media-stream] ❌ Top-level error: {type(e).__name__}: {e}")
+        logger.error(f"[media-stream] Top-level error: {type(e).__name__}: {e}")
     finally:
         if websocket.client_state != WebSocketState.DISCONNECTED:
             await websocket.close()

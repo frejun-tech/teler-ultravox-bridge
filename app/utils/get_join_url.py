@@ -36,11 +36,10 @@ async def get_join_url():
                     headers=headers
                 )
                 data = response.json()
-                logger.info(f"Initial data from Ultravox: {data}")
 
                 ULTRAVOX_JOIN_URL = data.get("joinUrl")
                 if ULTRAVOX_JOIN_URL:
-                    logger.info(f"Got joinUrl: {ULTRAVOX_JOIN_URL}")
+                    logger.debug(f"Got joinUrl: {ULTRAVOX_JOIN_URL}")
                     return ULTRAVOX_JOIN_URL  
 
             except Exception as e:
